@@ -64,12 +64,12 @@ Never switch these off, by hand, with ADB, or through `EXTRA_OFF` / `PRIVACY=1`:
 | `com.google.android.katniss` | Google Assistant / voice |
 | `com.google.android.webview` | WebView (couch-tv's home page and many apps need it) |
 | `com.google.android.inputmethod.latin` | Gboard, the on-screen keyboard |
-| `com.sony.dtv.ime.chww` | Sony's on-screen keyboard. ⚠️ `apply.sh`'s name guard does **not** catch this one (its pattern `*.ime` only matches names *ending* in `.ime`; found by the Sony safety test on 17 Nov 2026), so never put it in `EXTRA_OFF` |
+| `com.sony.dtv.ime.chww` | Sony's on-screen keyboard. Upstream's guard (`*.ime`, names *ending* in `.ime`) missed it; on `bravia-custom` `apply.sh` also refuses `*.ime.*` (fixed 17 Nov 2026, with tests). An upstream copy of `apply.sh` still would not refuse it, so never put it in `EXTRA_OFF` |
 | `com.google.android.gms`, `com.google.android.gsf` | Google Play services |
 | Anything `com.android.*`, `android` | Core Android |
 | Anything with *bluetooth, remote, rcu, voice, cec, inputmethod, tvinput, providers.tv* in the name | Remote control, HDMI-CEC, keyboard, TV inputs, Keep watching |
 
-`apply.sh` itself refuses all of these except Sony's keyboard (`NEVER_OFF` and `needed()` in
+`apply.sh` on `bravia-custom` refuses all of these (`NEVER_OFF` and `needed()` in
 `tv-home/tools/apply.sh`; checked with a fake TV loaded with this BRAVIA's package list).
 The table is here so a human never does it by hand either.
 
