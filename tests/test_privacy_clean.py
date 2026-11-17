@@ -23,7 +23,7 @@ LAUNCHER = "com.google.android.apps.tv.launcherx"
 
 def entries():
     out = []
-    for line in LIST.read_text().splitlines():
+    for line in LIST.read_text(encoding="utf-8").splitlines():
         if not line.strip() or line.lstrip().startswith("#"):
             continue
         out.append([f.strip() for f in line.split("|")])
@@ -35,7 +35,7 @@ def packages():
 
 
 def apply_text():
-    return (TOOLS / "apply.sh").read_text()
+    return (TOOLS / "apply.sh").read_text(encoding="utf-8")
 
 
 def never_off():
@@ -55,7 +55,7 @@ def guard_patterns():
 
 
 def never_disable():
-    src = (ROOT / "bridge" / "server.py").read_text()
+    src = (ROOT / "bridge" / "server.py").read_text(encoding="utf-8")
     m = re.search(r"NEVER_DISABLE = \{(.*?)\}", src, re.S)
     return set(re.findall(r'"([^"]+)"', m.group(1)))
 
@@ -125,7 +125,7 @@ class Run(unittest.TestCase):
         self.state.write_text(json.dumps(s))
 
     def read(self):
-        return json.loads(self.state.read_text())
+        return json.loads(self.state.read_text(encoding="utf-8"))
 
     def run_sh(self, script, **env):
         e = dict(self.env, **env)
@@ -137,7 +137,7 @@ class Run(unittest.TestCase):
         return [c.split()[-1] for c in self.read()["log"] if c.startswith("pm disable-user")]
 
     def undo_list(self):
-        return (self.dir / "tv-home" / "tvs" / "living-room.disabled").read_text().split()
+        return (self.dir / "tv-home" / "tvs" / "living-room.disabled").read_text(encoding="utf-8").split()
 
     def test_privacy_unset_changes_nothing(self):
         self.run_sh("apply.sh")

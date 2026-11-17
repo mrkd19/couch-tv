@@ -101,7 +101,7 @@ class StandIn:
         return t
 
     def cli_calls(self):
-        return [json.loads(l) for l in self.cli_log.read_text().splitlines() if l]
+        return [json.loads(l) for l in self.cli_log.read_text(encoding="utf-8").splitlines() if l]
 
     async def _handle(self, request):
         path = request.match_info["path"]

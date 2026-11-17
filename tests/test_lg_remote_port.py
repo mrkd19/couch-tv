@@ -70,13 +70,13 @@ class RemotePort(unittest.TestCase):
         t, d = make_tv()
         s = connect(t, {3000, 3001})
         self.assertEqual(s.tried, ["ws://192.0.2.1:3000"])
-        self.assertEqual(json.loads((d / "lg-test-port.json").read_text()), {"port": 3000})
+        self.assertEqual(json.loads((d / "lg-test-port.json").read_text(encoding="utf-8")), {"port": 3000})
 
     def test_3001_only_tv_is_tried_second_once_then_first(self):
         t, d = make_tv()
         s = connect(t, {3001})
         self.assertEqual(s.tried, ["ws://192.0.2.1:3000", "wss://192.0.2.1:3001"])
-        self.assertEqual(json.loads((d / "lg-test-port.json").read_text()), {"port": 3001})
+        self.assertEqual(json.loads((d / "lg-test-port.json").read_text(encoding="utf-8")), {"port": 3001})
         # the same run, a dropped connection: straight to 3001
         t._ws = None
         s = connect(t, {3001})
@@ -99,7 +99,7 @@ class RemotePort(unittest.TestCase):
         fresh.ip, fresh.connected = "192.0.2.1", True
         s = connect(fresh, {3000})   # firmware changed its mind
         self.assertEqual(s.tried, ["wss://192.0.2.1:3001", "ws://192.0.2.1:3000"])
-        self.assertEqual(json.loads((d / "lg-test-port.json").read_text()), {"port": 3000})
+        self.assertEqual(json.loads((d / "lg-test-port.json").read_text(encoding="utf-8")), {"port": 3000})
 
     def test_a_port_set_in_config_is_the_only_one(self):
         t, d = make_tv(port=3001)

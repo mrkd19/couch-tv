@@ -7,8 +7,8 @@ opening Settings tells the watch for a few seconds that Amazon's home coming for
 import pathlib, re, unittest
 
 SRC = pathlib.Path(__file__).resolve().parent.parent / "tv-home/android/app/src/main/java/app/couchtv/launcher"
-WATCH = (SRC / "FireWatch.kt").read_text()
-MAIN = (SRC / "MainActivity.kt").read_text()
+WATCH = (SRC / "FireWatch.kt").read_text(encoding="utf-8")
+MAIN = (SRC / "MainActivity.kt").read_text(encoding="utf-8")
 
 
 class FireSettingsWatch(unittest.TestCase):

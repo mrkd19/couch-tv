@@ -26,7 +26,7 @@ class CssVarFallbacks(unittest.TestCase):
         self.assertIn(".b { color: var(--kid); background: var(--tint); }", out)   # --kid set by JS, --tint redefined
 
     def test_real_app_css_keeps_every_var(self):
-        css = (Path(__file__).parents[1] / "tv-home" / "web" / "app.css").read_text()
+        css = (Path(__file__).parents[1] / "tv-home" / "web" / "app.css").read_text(encoding="utf-8")
         out = build.css_var_fallbacks(css)
         self.assertEqual(out.count("var("), css.count("var("))
         self.assertIn("top: 3.75rem; top: var(--safe-y);", out)

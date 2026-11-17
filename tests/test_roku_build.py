@@ -95,7 +95,7 @@ class Build(unittest.TestCase):
                     self.assertIn(s["fg"]["uri"].replace("pkg:/", ""), names)
 
     def test_manifest_has_what_a_channel_needs(self):
-        text = (ROKU / "channel" / "manifest").read_text()
+        text = (ROKU / "channel" / "manifest").read_text(encoding="utf-8")
         for key in ("title=", "major_version=", "minor_version=", "build_version=", "mm_icon_focus_hd=", "mm_icon_focus_fhd=", "ui_resolutions=fhd"):
             self.assertIn(key, text)
 

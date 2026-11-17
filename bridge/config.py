@@ -21,7 +21,7 @@ ROOT = os.path.dirname(HERE)
 def _load_dotenv():
     """Read KEY=value lines from .env in the repo root into the environment (never overrides)."""
     try:
-        with open(os.path.join(ROOT, ".env")) as f:
+        with open(os.path.join(ROOT, ".env"), encoding="utf-8-sig") as f:
             for line in f:
                 line = line.strip()
                 if line and not line.startswith("#") and "=" in line:
@@ -42,7 +42,7 @@ DATA = os.environ.get("COUCH_DATA") or os.path.join(HERE, "data")
 def _load():
     for path in (CONFIG_FILE, EXAMPLE_FILE):
         try:
-            with open(path) as f:
+            with open(path, encoding="utf-8-sig") as f:
                 return json.load(f), path
         except FileNotFoundError:
             continue
@@ -155,7 +155,7 @@ def clean_people(items):
 
 def _saved_people():
     try:
-        with open(PEOPLE_FILE) as f:
+        with open(PEOPLE_FILE, encoding="utf-8-sig") as f:
             data = json.load(f)
         return clean_people(data.get("people") if isinstance(data, dict) else data)
     except (FileNotFoundError, json.JSONDecodeError, AttributeError):

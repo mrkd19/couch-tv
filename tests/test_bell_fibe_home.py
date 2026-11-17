@@ -8,9 +8,9 @@ import pathlib, re, unittest
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SRC = ROOT / "tv-home/android/app/src/main/java/app/couchtv/launcher"
-WATCH = (SRC / "FireWatch.kt").read_text()
-MAIN = (SRC / "MainActivity.kt").read_text()
-APPLY = (ROOT / "tv-home/tools/apply.sh").read_text()
+WATCH = (SRC / "FireWatch.kt").read_text(encoding="utf-8")
+MAIN = (SRC / "MainActivity.kt").read_text(encoding="utf-8")
+APPLY = (ROOT / "tv-home/tools/apply.sh").read_text(encoding="utf-8")
 FIBE = "com.quickplay.android.bellmediaplayer"
 
 
