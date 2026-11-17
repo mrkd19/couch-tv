@@ -1,0 +1,23 @@
+# Line endings: the repository stores text with LF, and every checkout gets LF too, whatever the
+# computer's own Git setting. Git for Windows defaults to core.autocrlf=true, which turned every
+# file into CRLF and broke tests that read the sources (tests/test_mac_dock.js). Windows-only batch
+# files (gradlew.bat) are left exactly as they are stored, with the CRLF cmd.exe needs.
+* text=auto eol=lf
+*.bat -text
+*.cmd -text
+
+# Never touched as text.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.ico binary
+*.ttf binary
+*.otf binary
+*.woff binary
+*.woff2 binary
+*.jar binary
+*.apk binary
+*.mp4 binary
+*.zip binary
