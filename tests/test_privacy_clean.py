@@ -81,13 +81,19 @@ class TheList(unittest.TestCase):
             for pat in pats:
                 self.assertFalse(fnmatch.fnmatchcase(p, pat), "%s matches the guard's %s" % (p, pat))
 
+    def test_the_guard_keeps_every_keyboard(self):
+        # Sony's on-screen keyboard has ".ime." in the middle of its name: "*.ime" alone missed it
+        pats = guard_patterns()
+        for p in ("com.sony.dtv.ime.chww", "com.example.ime", "com.google.android.inputmethod.latin"):
+            self.assertTrue(any(fnmatch.fnmatchcase(p, pat) for pat in pats), p + " is not protected by needed()")
+
     def test_keep_watching_and_the_remote_are_never_listed(self):
         bad = re.compile(
             r"launcher|tvhome|setup|wraith|provision|oobe|gms|gsf|vending|venezia|systemui|"
             r"providers\.tv|tvprovider|tv\.provider|listings|watchnext|watch_next|recommend|channel|"
             r"tvinput|tifobserver|tuner|livetv|"
             r"bluetooth|pair|\.ble|remote|rcu|fireinputdevices|keypolicy|voice|assistant|katniss|vizzini|"
-            r"cec|devicecontrol|inputmethod|\.ime$|keyboard|"
+            r"cec|devicecontrol|inputmethod|\.ime(\.|$)|keyboard|"
             r"ota|update|upgrade|mediashell|cast|webview",
             re.I)
         for p in packages():
@@ -211,6 +217,15 @@ class Run(unittest.TestCase):
             f.write("a.b;reboot | test | bad | - | test\n")
         self.run_sh("apply.sh", PRIVACY="1")
         self.assertFalse([c for c in self.read()["log"] if "reboot" in c])
+
+    def test_extra_off_never_switches_off_a_keyboard(self):
+        # Seen on a Sony BRAVIA (Google TV, Android 12): its keyboard is com.sony.dtv.ime.chww
+        ime = "com.sony.dtv.ime.chww"
+        self.tv(present=[LAUNCHER, DREAM, ime])
+        out = self.run_sh("apply.sh", EXTRA_OFF=ime)
+        self.assertNotIn(ime, self.switched_off())
+        self.assertNotIn(ime, self.read()["disabled"])
+        self.assertIn("leaving %s on" % ime, out)
 
 
 if __name__ == "__main__":

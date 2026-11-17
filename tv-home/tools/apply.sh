@@ -103,8 +103,9 @@ needed() {
   case "$1" in
     android|app.couchtv.*|com.android.*|com.google.android.gms|com.google.android.gsf|*webview*|com.google.android.trichromelibrary|com.google.android.tv.remote.service|com.google.android.katniss|com.google.android.permissioncontroller|com.google.android.packageinstaller|com.google.android.networkstack*|com.google.android.ext.*|com.google.android.providers.*|com.sony.dtv.sonysystemservice|com.sony.dtv.tvx|*setupwizard*|*.setup|*provision*) return 0 ;;
     # The remote (Bluetooth, pairing, voice, the Assistant, HDMI CEC, the keyboard) and Keep watching
-    # (the TV provider that holds Watch Next, TV inputs and listings) always stay on.
-    *bluetooth*|*pair*|*.ble*|*remote*|*rcu*|*voice*|*assistant*|*katniss*|*vizzini*|*cec*|*inputmethod*|*.ime|*inputdevice*|*providers.tv*|*tvinput*|*tvprovider*|*listings*|*watchnext*) return 0 ;;
+    # (the TV provider that holds Watch Next, TV inputs and listings) always stay on. Keyboards are
+    # matched as ".ime" at the end or in the middle (Sony's on-screen keyboard is com.sony.dtv.ime.chww).
+    *bluetooth*|*pair*|*.ble*|*remote*|*rcu*|*voice*|*assistant*|*katniss*|*vizzini*|*cec*|*inputmethod*|*.ime|*.ime.*|*inputdevice*|*providers.tv*|*tvinput*|*tvprovider*|*listings*|*watchnext*) return 0 ;;
   esac
   echo "$homes" | grep -qx "$1" && return 0
   "$PY" "$T" shell "dumpsys package $1" | grep -q -E "(pkgFlags|flags)=\[.*PERSISTENT" && return 0
