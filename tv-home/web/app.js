@@ -402,6 +402,7 @@
     document.documentElement.classList.toggle("lighter", LIGHTER);
     ambientSync();
     movingTiles();
+    calmLook();
     // glass app icons (#25): set in Home settings, else home.glass_icons; off unless switched on
     GLASS_ICONS = typeof ST.glass_icons === "boolean" ? ST.glass_icons : HOME.glass_icons === true;
     NP_ON = typeof ST.now_playing === "boolean" ? ST.now_playing : HOME.now_playing !== false;
@@ -467,6 +468,21 @@
     if (typeof magnify === "function") magnify();
   }
   var DOCK_MAC = false;
+  // The calm look (bravia-custom), each part off unless config.json's home section asks for it:
+  //   drift: false          the Classic look's photo holds still at its own framing (no slow zoom and
+  //                         no 4% crop, Lighter home or not); the Night scenes never move anyway
+  //   date_pill: true       the Night date sits in a small rounded glass pill
+  //   focus_style: "lift"   the focused app lifts with one fixed soft shadow and a thin light edge,
+  //                         instead of the white ring; nothing on it moves after it settles
+  //   overlay: "cinematic"  a gentle fixed shade at the top and bottom of the Night scenes, for the
+  //                         date and the rows, so the photo itself can stay bright
+  function calmLook() {
+    var r = document.documentElement;
+    r.classList.toggle("no-drift", HOME.drift === false);
+    r.classList.toggle("date-pill", HOME.date_pill === true);
+    r.classList.toggle("focus-lift", HOME.focus_style === "lift");
+    r.classList.toggle("overlay-cinematic", HOME.overlay === "cinematic");
+  }
   // Lighter home: ask for the 640 px size of a Keep watching picture, not the 1440 px one (a card is about 500 px wide)
   function slim(u) { return LIGHTER && typeof u === "string" ? u.replace("/s1440/", "/s640/") : u; }
   function glassSetting() { var g = ST.glass || HOME.glass; return g === "on" || g === "lite" ? g : "off"; }

@@ -101,6 +101,20 @@
   if (arg("sungrade")) cfg.home.ambient_sun_grade = arg("sungrade") !== "off";
   if (arg("unit")) cfg.home.wx_unit = arg("unit");   // home.wx_unit: c or f (#56)
   if (arg("video")) cfg.home.video_url = arg("video");
+  // the calm look (bravia-custom; app.js calmLook()), one at a time or all at once with profile=bravia
+  if (arg("drift")) cfg.home.drift = arg("drift") !== "off";              // drift=off: the Classic photo holds still
+  if (arg("datepill")) cfg.home.date_pill = arg("datepill") !== "off";    // datepill=1: the date in a glass pill
+  if (arg("focus")) cfg.home.focus_style = arg("focus");                  // focus=lift: Apple TV style focus
+  if (arg("overlay")) cfg.home.overlay = arg("overlay");                  // overlay=cinematic: the soft fixed shade
+  // profile=bravia: the BRAVIA performance profile (tv-home/tools, docs): Lighter home, glass without
+  // blur, nothing moving, 1080 pictures, the frosted clock, a scene a minute, the classic dock, rows
+  // fading after 15 s idle, and the calm look. Other arguments in the address still win over it.
+  if (arg("profile") === "bravia") {
+    var bravia = { look: "night", lighter: true, glass: "lite", moving_tiles: false, drift: false, hi_res: false,
+      clock_style: "frosted", scene_seconds: 60, updates: "manual", dock: "classic", idle_photo_seconds: 15,
+      date_pill: true, focus_style: "lift", overlay: "cinematic" };
+    Object.keys(bravia).forEach(function (k) { if (!(k in cfg.home)) cfg.home[k] = bravia[k]; });
+  }
   // ---------- kids mode, for ?kids= (bridge/kids.py makes the same shape; the PIN here is 1234) ----------
   var KIDS = null;
   if (arg("kids")) {

@@ -344,6 +344,16 @@ def _home(h):
         out["glass_amount"] = h["glass_amount"]
     if h.get("clock_style") in ("frosted", "liquid"):
         out["clock_style"] = h["clock_style"]
+    # the calm look (bravia-custom, app.js calmLook()): a still Classic photo at its own framing, the
+    # Night date in a glass pill, an Apple TV style focus lift, and a soft fixed shade over the scenes
+    if isinstance(h.get("drift"), bool):
+        out["drift"] = h["drift"]
+    if isinstance(h.get("date_pill"), bool):
+        out["date_pill"] = h["date_pill"]
+    if h.get("focus_style") in ("ring", "lift"):
+        out["focus_style"] = h["focus_style"]
+    if h.get("overlay") in ("default", "cinematic"):
+        out["overlay"] = h["overlay"]
     # temperature unit for the weather: c or f (#56). Home settings on the TV win over it.
     if h.get("wx_unit") in ("c", "f"):
         out["wx_unit"] = h["wx_unit"]
