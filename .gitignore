@@ -11,6 +11,17 @@ adbkey.pub
 pair-code*.txt
 token*.txt
 
+# Private TV backups (BRAVIA surveys, original TV state, apply.sh undo copies): never commit.
+# They live outside the repo in the private TV Setup folder (docs/BRAVIA-RECOVERY.md, section 7).
+private/
+TV Setup/
+.TV Setup/
+*survey*.json
+original-tv-state.json
+original-packages.json
+original-launcher-state.json
+BRAVIA-RECOVERY-BACKUP.md
+
 # Everything the bridge learns about the people using it
 bridge/data/
 data/
