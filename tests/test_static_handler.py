@@ -47,7 +47,9 @@ class TestStaticHandler(AioHTTPTestCase):
     async def test_text_is_compressed_when_the_page_accepts_it(self):
         # a Fire TV Cube on weak Wi-Fi reloaded 920 KB of uncompressed script and style per Look switch
         big = "body { background: #000; }\n" * 200
-        with open(os.path.join(self.static_dir, "big.css"), "w", encoding="utf-8") as f:
+        # newline="\n": the bridge serves the file's bytes as they are, so write LF on every platform
+        # (text mode on Windows would store CRLF and the comparisons below would see different text)
+        with open(os.path.join(self.static_dir, "big.css"), "w", encoding="utf-8", newline="\n") as f:
             f.write(big)
         resp = await self.client.get("/static/big.css", headers={"Accept-Encoding": "gzip"}, auto_decompress=False)
         self.assertEqual(resp.status, 200)
