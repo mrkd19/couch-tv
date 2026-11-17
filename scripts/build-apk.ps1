@@ -1,10 +1,28 @@
-# PowerShell counterpart to scripts/build-apk.sh for Windows
+# PowerShell counterpart to scripts/build-apk.sh for Windows. Builds only the TV home
+# (dist\couch-tv-home.apk); use build-apk.sh in Git Bash for the on-TV and sync apps.
+#
+# Needs JDK 21 and the Android SDK with platform 34 and build tools 34 (docs/SETUP.md, "Building
+# the app"). Set JAVA_HOME and ANDROID_HOME for this PowerShell session only, or unpack them into
+# build\jdk and build\android-sdk inside the repo (git ignores build\):
+#   $env:JAVA_HOME = "C:\path\to\jdk-21"; $env:ANDROID_HOME = "C:\path\to\android-sdk"
+#   powershell -ExecutionPolicy Bypass -File scripts\build-apk.ps1
+#
+# The settings built into the home's own copy come from config.example.json, the same default as
+# build-apk.sh, so your private config.json never ends up inside an APK file. apply.sh hands the TV
+# your config.json at install time anyway. To build your own settings in on purpose, set
+# $env:CONFIG to that file.
 $ErrorActionPreference = "Stop"
 
 $ROOT = Split-Path -Parent $PSScriptRoot
-$CONFIG = Join-Path $ROOT "config.json"
-if (-not (Test-Path $CONFIG)) {
+if ($env:CONFIG) {
+    $CONFIG = $env:CONFIG
+    if (-not [System.IO.Path]::IsPathRooted($CONFIG)) { $CONFIG = Join-Path $ROOT $CONFIG }
+} else {
     $CONFIG = Join-Path $ROOT "config.example.json"
+}
+if (-not (Test-Path $CONFIG)) {
+    Write-Error "Settings file not found: $CONFIG"
+    exit 1
 }
 
 if (-not $env:JAVA_HOME) {
@@ -12,20 +30,25 @@ if (-not $env:JAVA_HOME) {
     if (Test-Path "$jdk\bin\javac.exe") {
         $env:JAVA_HOME = $jdk
     } else {
-        Write-Error "JAVA_HOME is not set and build\jdk not found. Run scripts\setup_build_tools.py first."
+        Write-Error "JAVA_HOME is not set and build\jdk not found. Set JAVA_HOME to a JDK 21 (docs/SETUP.md, Building the app)."
         exit 1
     }
 }
 
 if (-not $env:ANDROID_HOME) {
     $sdk = Join-Path $ROOT "build\android-sdk"
-    if (Test-Path "$sdk\cmdline-tools\latest\bin\sdkmanager.bat") {
+    if (Test-Path "$sdk\platforms") {
         $env:ANDROID_HOME = $sdk
     } else {
-        Write-Error "ANDROID_HOME is not set and build\android-sdk not found. Run scripts\setup_build_tools.py first."
+        Write-Error "ANDROID_HOME is not set and build\android-sdk not found. Set ANDROID_HOME to your Android SDK (docs/SETUP.md, Building the app)."
         exit 1
     }
 }
+if (-not (Test-Path (Join-Path $env:ANDROID_HOME "platforms\android-34"))) {
+    Write-Error "No Android platform 34 in $env:ANDROID_HOME. Install platform 34 and build tools 34 (docs/SETUP.md, Building the app)."
+    exit 1
+}
+Write-Host "Settings built in: $CONFIG"
 
 $env:PATH = "$env:JAVA_HOME\bin;$env:PATH"
 
