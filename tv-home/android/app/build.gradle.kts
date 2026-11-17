@@ -1,12 +1,20 @@
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import java.io.File
+import java.security.KeyStore
+import java.security.MessageDigest
 import java.util.Properties
 
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
 }
+
+// The release signing key (COUCHTV_KEYSTORE) and, for a fork's permanent key, its private
+// <keystore>.properties file next to it. Checked before every release build (requireReleaseKey, below).
+val fixedKey: File? = System.getenv("COUCHTV_KEYSTORE")?.let { file(it) }?.takeIf { it.isFile }
+val fixedProps: Properties? = fixedKey?.let { key -> File(key.path + ".properties") }?.takeIf { it.isFile }
+    ?.let { f -> Properties().apply { f.inputStream().use { input -> load(input) } } }
 
 android {
     namespace = "app.couchtv.launcher"
@@ -33,10 +41,7 @@ android {
     // password android), release builds are signed with it, so one test build can update the last (#4).
     // A fork's own permanent key keeps its passwords and alias out of the repo, in a file next to the
     // keystore named <keystore>.properties (storePassword, keyPassword, keyAlias). Without that file
-    // the test-key values above are used, as before.
-    val fixedKey = System.getenv("COUCHTV_KEYSTORE")?.let { file(it) }?.takeIf { it.isFile }
-    val fixedProps = fixedKey?.let { key -> File(key.path + ".properties") }?.takeIf { it.isFile }
-        ?.let { f -> Properties().apply { f.inputStream().use { input -> load(input) } } }
+    // the test-key values above are used, as before. (fixedKey and fixedProps are read at the top.)
     signingConfigs {
         if (fixedKey != null) create("fixed") {
             storeFile = fixedKey
@@ -150,4 +155,38 @@ androidComponents {
     onVariants { variant ->
         variant.sources.assets?.addGeneratedSourceDirectory(bundleTvWeb, BundleTvWeb::outputDir)
     }
+}
+
+// Release signing guard (bravia-custom). With requireReleaseKey=true (gradle.properties) a release
+// build never falls back to the debug key: it stops unless COUCHTV_KEYSTORE names the permanent key,
+// its <keystore>.properties holds storePassword, keyPassword and keyAlias, and the key's certificate
+// SHA-256 is releaseCertSha256. Debug builds and unit tests are not affected. -PallowTestSigning=true
+// lets a deliberate test build (CI, a throwaway key) through, with a warning. No password is printed.
+fun checkReleaseKey() {
+    if ((project.findProperty("requireReleaseKey") as String?)?.toBoolean() != true) return
+    if ((project.findProperty("allowTestSigning") as String?)?.toBoolean() == true) {
+        logger.warn("allowTestSigning=true: this release build is NOT checked for the permanent signing key")
+        return
+    }
+    val help = "Set COUCHTV_KEYSTORE to the fork's permanent key (C:/dev/tools/signing/couchtv-bravia.jks, " +
+        "see README-SIGNING.md next to it). Release builds of this fork are never signed with the debug key."
+    val key = fixedKey ?: throw GradleException("Release signing: COUCHTV_KEYSTORE is not set or not a file. $help")
+    val props = fixedProps ?: throw GradleException("Release signing: ${key.name}.properties is missing next to the keystore. $help")
+    val missing = listOf("storePassword", "keyPassword", "keyAlias").filter { props.getProperty(it).isNullOrBlank() }
+    if (missing.isNotEmpty()) throw GradleException("Release signing: ${key.name}.properties lacks ${missing.joinToString()}. $help")
+    val ks = try {
+        KeyStore.getInstance(key, props.getProperty("storePassword").toCharArray())
+    } catch (e: Exception) {
+        throw GradleException("Release signing: ${key.name} could not be opened with the password in its .properties file (${e.javaClass.simpleName}).")
+    }
+    val cert = ks.getCertificate(props.getProperty("keyAlias"))
+        ?: throw GradleException("Release signing: alias ${props.getProperty("keyAlias")} is not in ${key.name}.")
+    val actual = MessageDigest.getInstance("SHA-256").digest(cert.encoded).joinToString(":") { b -> "%02X".format(b) }
+    val expected = (project.findProperty("releaseCertSha256") as String? ?: "").trim().uppercase()
+    if (expected.isEmpty()) throw GradleException("Release signing: releaseCertSha256 is not set in gradle.properties.")
+    if (actual != expected) throw GradleException("Release signing: ${key.name} has certificate SHA-256 $actual, expected $expected. Wrong key: nothing was signed.")
+    logger.lifecycle("Release signing: permanent key ${key.name}, certificate SHA-256 $actual")
+}
+tasks.configureEach {
+    if (name == "validateSigningRelease" || name == "packageRelease") doFirst { checkReleaseKey() }
 }
