@@ -13,7 +13,7 @@ simply want it gone.
 | TV | Sony BRAVIA 3 (S30 series), internal model `BRAVIA BF1` |
 | Software | Google TV, Android TV OS 12 (API 31), build `STT2.230811.001` |
 | Original state recorded | 17 November 2026, read-only survey, couch-tv not installed |
-| Checked against | couch-tv `main` @ `1b3e49a` (release 0.12): `tv-home/tools/apply.sh`, `undo.sh`, `remove-all.sh`, `tvadb.py`, `FireWatch.kt`, `CrashGuard.kt`, `AndroidManifest.xml` |
+| Checked against | couch-tv `main` @ `1b3e49a` (release 0.12): `tv-home/tools/apply.sh`, `undo.sh`, `remove-all.sh`, `tvadb.py`, `FireWatch.kt`, `CrashGuard.kt`, `AndroidManifest.xml`. Re-checked 17 Nov 2026 after the `bravia-custom` Windows fixes (the scripts now find `.venv/Scripts/python.exe` by themselves; nothing else in them changed) |
 | Recovery commands tested on the TV? | **No.** They were read and checked against the scripts and the recorded TV state, and the Windows behaviour of the scripts was tested against an unused test address. They were never run on the TV. |
 
 **Contents**
@@ -128,9 +128,11 @@ export TV_IP=<TV_IP>
 export PY=/c/dev/couch-tv/.venv/Scripts/python.exe
 ```
 
-> ⚠️ **On Windows, `PY` is required.** The scripts look for `.venv/bin/python`, which only exists on
-> Mac/Linux. Without `PY` they print *"The computer cannot reach the TV"* even when the TV is fine
-> (tested).
+> ⚠️ **Keep the `export PY=…` line.** On the `bravia-custom` branch the scripts find
+> `.venv/Scripts/python.exe` by themselves. But an older or upstream copy of the scripts only looks
+> for `.venv/bin/python`, which exists only on Mac/Linux. Without `PY`, those copies print *"The
+> computer cannot reach the TV"* even when the TV is fine (tested). Setting `PY` works with every
+> version.
 
 **Windows PowerShell**. For single commands with `tvadb.py`:
 
