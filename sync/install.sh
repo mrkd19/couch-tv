@@ -12,6 +12,8 @@
 set -u
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 PY=${PYTHON:-$ROOT/.venv/bin/python}
+# Windows (Git Bash): python -m venv puts the interpreter in .venv/Scripts/python.exe, not .venv/bin.
+case "$PY" in "$ROOT/.venv/bin/python") [ -e "$PY" ] || [ ! -e "$ROOT/.venv/Scripts/python.exe" ] || PY="$ROOT/.venv/Scripts/python.exe" ;; esac
 [ -x "$PY" ] || PY=$(command -v python3)
 TVADB="$ROOT/tv-home/tools/tvadb.py"
 PKG=dev.couchtv.sync

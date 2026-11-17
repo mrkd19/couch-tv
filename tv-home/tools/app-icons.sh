@@ -16,6 +16,8 @@
 set -e
 HERE=$(cd "$(dirname "$0")" && pwd)
 PY="${PY:-$HERE/../../.venv/bin/python}"
+# Windows (Git Bash): python -m venv puts the interpreter in .venv/Scripts/python.exe, not .venv/bin.
+case "$PY" in "$HERE/../../.venv/bin/python") [ -e "$PY" ] || [ ! -e "$HERE/../../.venv/Scripts/python.exe" ] || PY="$HERE/../../.venv/Scripts/python.exe" ;; esac
 T="$HERE/tvadb.py"
 : "${TV_IP:?set TV_IP to the address of the TV}"
 export TV_IP

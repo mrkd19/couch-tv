@@ -40,6 +40,8 @@ set -e
 HERE=$(cd "$(dirname "$0")" && pwd)
 ROOT=$(cd "$HERE/../.." && pwd)
 PY="${PY:-$ROOT/.venv/bin/python}"
+# Windows (Git Bash): python -m venv puts the interpreter in .venv/Scripts/python.exe, not .venv/bin.
+case "$PY" in "$ROOT/.venv/bin/python") [ -e "$PY" ] || [ ! -e "$ROOT/.venv/Scripts/python.exe" ] || PY="$ROOT/.venv/Scripts/python.exe" ;; esac
 T="$HERE/tvadb.py"
 TV_NAME=${TV_NAME:-${TV_ID:-living-room}}
 DRY=${DRY_RUN:-0}

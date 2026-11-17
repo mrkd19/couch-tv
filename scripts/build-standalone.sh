@@ -12,7 +12,7 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 OUT="${1:-$ROOT/build/standalone}"
-PY="$ROOT/.venv/bin/python"; [ -x "$PY" ] || PY=python3
+PY="$ROOT/.venv/bin/python"; [ -x "$PY" ] || PY="$ROOT/.venv/Scripts/python.exe"; [ -x "$PY" ] || PY=python3   # .venv/Scripts on Windows (Git Bash)
 
 # rsync --delete empties the folder first: only ever into a new or empty folder, or an earlier build
 # (it carries the .couch-standalone marker), never a folder of other things given by mistake
