@@ -13,7 +13,7 @@ simply want it gone.
 | TV | Sony BRAVIA 3 (S30 series), internal model `BRAVIA BF1` |
 | Software | Google TV, Android TV OS 12 (API 31), build `STT2.230811.001` |
 | Original state recorded | 17 November 2026, read-only survey, couch-tv not installed |
-| Checked against | couch-tv `main` @ `1b3e49a` (release 0.12): `tv-home/tools/apply.sh`, `undo.sh`, `remove-all.sh`, `tvadb.py`, `FireWatch.kt`, `CrashGuard.kt`, `AndroidManifest.xml`. Re-checked 17 Nov 2026 after the `bravia-custom` Windows fixes (the scripts now find `.venv/Scripts/python.exe` by themselves; nothing else in them changed) |
+| Checked against | couch-tv `main` @ `1b3e49a` (release 0.12): `tv-home/tools/apply.sh`, `undo.sh`, `remove-all.sh`, `tvadb.py`, `FireWatch.kt`, `CrashGuard.kt`, `AndroidManifest.xml`. Re-checked 17 Nov 2026 after the `bravia-custom` Windows fixes (the scripts now find `.venv/Scripts/python.exe` by themselves; nothing else in them changed). Re-checked again 17 Nov 2026 after merging upstream `ac9aa93` into `bravia-custom` (merge `42bd854`): only `apply.sh` changed, so that it re-checks the Home button watch after pressing Home (§1.4, row 6); `undo.sh`, `remove-all.sh`, `tvadb.py` and the app are unchanged |
 | Recovery commands tested on the TV? | **No.** They were read and checked against the scripts and the recorded TV state, and the Windows behaviour of the scripts was tested against an unused test address. They were never run on the TV. |
 
 **Contents**
@@ -94,7 +94,7 @@ Recovery means undoing exactly this list (read from `tv-home/tools/apply.sh`):
 | 3 | Switches off ambient mode: `pm disable-user --user 0 com.google.android.apps.tv.dreamx` (plus anything in `EXTRA_OFF` / `PRIVACY=1`, if used) | `undo.sh` (`pm enable`) |
 | 4 | Grants `READ_TV_LISTINGS`; sets app-op `WRITE_SETTINGS allow` (and `SYSTEM_ALERT_WINDOW` only with a doorbell) | `undo.sh` resets the app-ops; uninstalling removes the rest |
 | 5 | Grants `WRITE_SECURE_SETTINGS` | `undo.sh` revokes it **first** |
-| 6 | Turns on the accessibility service **"Home button watch"** (`app.couchtv.launcher/.FireWatch`) and `accessibility_enabled 1` | `undo.sh` |
+| 6 | Turns on the accessibility service **"Home button watch"** (`app.couchtv.launcher/.FireWatch`) and `accessibility_enabled 1`. After pressing Home it **looks again** (up to 3 times, 5 s apart) and writes the same two settings once more if they were cleared, keeping any other accessibility service in the list (seen on a Fire TV; upstream `09439cb`) | `undo.sh` |
 | 7 | On the PC: writes `tv-home/tvs/<TV_NAME>.home` (the original home) and `tv-home/tvs/<TV_NAME>.disabled` (what it switched off) | Used by `undo.sh`. **Back these up** ([§4](#4-before-every-future-installation-mandatory-checklist)) |
 
 It never switches off the Google TV home or the setup app. If it finds them switched off, it switches
@@ -351,8 +351,11 @@ Which methods need you **physically at the TV**:
 ### 3.2 The Home button doesn't behave as expected
 
 - Google TV's home **flashing briefly** before couch-tv appears is expected (documented upstream).
-- Home **stays** on Google TV: the watch isn't bound. Restart the TV (§3.3), or run `apply.sh`
-  again. That's a re-install step, so it needs the §4 checklist.
+- Home **stays** on Google TV: the watch isn't bound, or its two settings were cleared after the
+  install (seen on a Fire TV; `apply.sh` now re-checks them). First check, read-only, with the
+  §2.5 command `settings get secure enabled_accessibility_services`: it should list
+  `app.couchtv.launcher/.FireWatch`. Then restart the TV (§3.3), or run `apply.sh` again. That's a
+  re-install step, so it needs the §4 checklist.
 - Home **loops** between Google TV and couch-tv, or you can't get out: press **Back** twice, then
   use §2.5.
 
