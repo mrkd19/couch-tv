@@ -1,5 +1,7 @@
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import java.io.File
+import java.util.Properties
 
 plugins {
     id("com.android.application")
@@ -13,8 +15,8 @@ android {
         applicationId = "app.couchtv.launcher"
         minSdk = 23          // Android 6.0 (older Mi TVs); Fire OS 6 (7.1) sticks install it too
         targetSdk = 34
-        versionCode = 14
-        versionName = "0.12"
+        versionCode = 15
+        versionName = "0.13-bravia.1"   // bravia-custom fork build (mrkd19/couch-tv), not an upstream release
         // Where the bridge might be: ./gradlew assembleRelease -PbridgeUrls=http://my-computer.local:5400
         // (comma separated, more than one is fine). The last one that answered is remembered on the TV.
         // Without it, apply.sh tells the app the address when it installs (the "bridge" extra), and
@@ -29,13 +31,18 @@ android {
     buildFeatures { buildConfig = true }
     // Test builds: when COUCHTV_KEYSTORE names a keystore (a debug-style key, alias androiddebugkey,
     // password android), release builds are signed with it, so one test build can update the last (#4).
+    // A fork's own permanent key keeps its passwords and alias out of the repo, in a file next to the
+    // keystore named <keystore>.properties (storePassword, keyPassword, keyAlias). Without that file
+    // the test-key values above are used, as before.
     val fixedKey = System.getenv("COUCHTV_KEYSTORE")?.let { file(it) }?.takeIf { it.isFile }
+    val fixedProps = fixedKey?.let { key -> File(key.path + ".properties") }?.takeIf { it.isFile }
+        ?.let { f -> Properties().apply { f.inputStream().use { input -> load(input) } } }
     signingConfigs {
         if (fixedKey != null) create("fixed") {
             storeFile = fixedKey
-            storePassword = "android"
-            keyAlias = "androiddebugkey"
-            keyPassword = "android"
+            storePassword = fixedProps?.getProperty("storePassword") ?: "android"
+            keyAlias = fixedProps?.getProperty("keyAlias") ?: "androiddebugkey"
+            keyPassword = fixedProps?.getProperty("keyPassword") ?: "android"
         }
     }
     buildTypes {
